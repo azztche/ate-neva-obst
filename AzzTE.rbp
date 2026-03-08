@@ -1,0 +1,10 @@
+FMTSECTION typeconf text
+
+LICENSE MIT
+TYPE opensource
+PROJECT ate-neva-obst
+
+AUTHOR azzte
+PROVIDER nevaobject
+PROJECT sdk
+NAME object-storage
