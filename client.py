@@ -1,5 +1,5 @@
 """
-ate-neva-obst client.
+NevaObjectsClient - High-level S3-compatible client for Neva Objects.
 """
 
 from __future__ import annotations
@@ -12,7 +12,7 @@ import boto3
 from botocore.client import Config
 from botocore.exceptions import ClientError
 
-from .exceptions import DownloadError, ListError, ObjectsError, UploadError
+from .exceptions import DownloadError, ListError, NevaObjectsError, UploadError
 
 DEFAULT_ENDPOINT = "https://s3.nevaobjects.id"
 
@@ -31,8 +31,8 @@ class ObjectInfo:
 
 
 @dataclass
-class ObjectsConfig:
-    """Configuration for Domainesia/NevaObjectsClient."""
+class NevaObjectsConfig:
+    """Configuration for NevaObjectsClient."""
 
     access_key: str
     secret_key: str
@@ -42,21 +42,21 @@ class ObjectsConfig:
     extra_boto_config: dict = field(default_factory=dict)
 
 
-class ObjectsClient:
+class NevaObjectsClient:
     """
-    High-level client for Domainesia/Neva Objects S3-compatible storage.
+    High-level client for Neva Objects S3-compatible storage.
 
     Example usage::
 
-        from dme-obst import ObjectsClient
-        from dme-obst.client import ObjectsConfig
+        from neva_obst import NevaObjectsClient
+        from neva_obst.client import NevaObjectsConfig
 
-        config = ObjectsConfig(
+        config = NevaObjectsConfig(
             access_key="YOUR_ACCESS_KEY",
             secret_key="YOUR_SECRET_KEY",
             bucket="my-bucket",
         )
-        client = ObjectsClient(config)
+        client = NevaObjectsClient(config)
 
         # Upload
         client.upload("./photo.jpg")
@@ -72,7 +72,7 @@ class ObjectsClient:
         client.delete("photo.jpg")
     """
 
-    def __init__(self, config: ObjectsConfig) -> None:
+    def __init__(self, config: NevaObjectsConfig) -> None:
         self.config = config
         self._s3 = self._build_client()
 
@@ -233,13 +233,13 @@ class ObjectsClient:
             object_key: Key of the object to delete.
 
         Raises:
-            ObjectsError: If deletion fails.
+            NevaObjectsError: If deletion fails.
         """
         try:
             self._s3.delete_object(Bucket=self.config.bucket, Key=object_key)
         except ClientError as exc:
             code, msg = self._parse_client_error(exc)
-            raise ObjectsError(
+            raise NevaObjectsError(
                 f"Failed to delete '{object_key}': {msg}",
                 code=code,
                 original=exc,
@@ -259,7 +259,7 @@ class ObjectsClient:
             if exc.response["Error"]["Code"] in ("404", "NoSuchKey"):
                 return False
             code, msg = self._parse_client_error(exc)
-            raise ObjectsError(
+            raise NevaObjectsError(
                 f"Failed to check existence of '{object_key}': {msg}",
                 code=code,
                 original=exc,
@@ -269,7 +269,7 @@ class ObjectsClient:
     # Context manager support
     # ------------------------------------------------------------------
 
-    def __enter__(self) -> "ObjectsClient":
+    def __enter__(self) -> "NevaObjectsClient":
         return self
 
     def __exit__(self, *_) -> None:
@@ -277,6 +277,6 @@ class ObjectsClient:
 
     def __repr__(self) -> str:
         return (
-            f"ObjectsClient(bucket={self.config.bucket!r}, "
+            f"NevaObjectsClient(bucket={self.config.bucket!r}, "
             f"endpoint={self.config.endpoint!r})"
         )
