@@ -1,0 +1,227 @@
+Metadata-Version: 2.4
+Name: ate-neva-obst
+Version: 2.0.5
+Summary: Unofficial Python SDK for Neva Object Storage (S3-compatible).
+Project-URL: Homepage, https://azzte.com/projects/ate-neva-obst/
+Project-URL: Repository, https://github.com/azztche/ate-neva-obst
+Project-URL: Website, https://azzte.com/
+Author-email: AzzTE <azztecheco@gmail.com>
+License: Apache-2.0
+License-File: LICENSE
+License-File: NOTICE
+Keywords: domainesia,nevaobjects,object-storage,s3,sdk,storage,upload
+Classifier: License :: OSI Approved :: Apache Software License
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Requires-Python: >=3.10
+Requires-Dist: binaryornot>=0.4.4
+Requires-Dist: boto3>=1.40
+Requires-Dist: click>=8.0.0
+Provides-Extra: dev
+Requires-Dist: moto[s3]>=4.0; extra == 'dev'
+Requires-Dist: pytest-cov; extra == 'dev'
+Requires-Dist: pytest>=7.0; extra == 'dev'
+Requires-Dist: ruff; extra == 'dev'
+Description-Content-Type: text/markdown
+
+# ate-neva-obst
+
+![PyPI](https://img.shields.io/pypi/v/ate-neva-obst)
+![Python](https://img.shields.io/pypi/pyversions/ate-neva-obst)
+![License](https://img.shields.io/pypi/l/ate-neva-obst)
+
+Unofficial Python SDK for **Neva Object Storage** (S3-compatible).
+
+---
+
+## Installation
+
+```bash
+pip install ate-neva-obst
+```
+
+---
+
+## SDK Usage
+
+```python
+from neva_obst import ObjectsClient
+from neva_obst.client import ObjectsConfig
+
+config = ObjectsConfig(
+    access_key="YOUR_ACCESS_KEY",
+    secret_key="YOUR_SECRET_KEY",
+    bucket="my-bucket",
+)
+
+with ObjectsClient(config) as client:
+
+    # Upload file
+    key = client.upload("./photo.jpg")
+    print(f"Uploaded: {key}")
+
+    # Upload with custom object key
+    client.upload("./document.pdf", object_key="reports/2024/document.pdf")
+
+    # Check if object exists
+    if client.object_exists("photo.jpg"):
+        print("Object exists!")
+
+    # List all objects
+    for obj in client.list():
+        print(f"{obj.key}  {obj.size} bytes  {obj.last_modified}")
+
+    # Get only object keys
+    keys = client.list_keys(prefix="reports/")
+
+    # Download object
+    client.download(object_key="photo.jpg", local_path="./photo.jpg")
+
+    # Generate download URL (default expiry)
+    url = client.get_download_url("photo.jpg")
+
+    # Generate download URL with custom expiry (1 hour)
+    url = client.get_download_url("photo.jpg", expires_in=3600)
+
+    # Delete object
+    client.delete("photo.jpg")
+```
+
+### Error Handling
+
+```python
+from neva_obst import ObjectsClient, UploadError, ListError, DownloadError, ObjectsError
+
+try:
+    client.upload("./file.txt")
+except FileNotFoundError as e:
+    print(f"File not found: {e}")
+except UploadError as e:
+    print(f"Upload failed [{e.code}]: {e}")
+except ObjectsError as e:
+    print(f"General error: {e}")
+```
+
+### Full Configuration
+
+```python
+config = ObjectsConfig(
+    access_key="YOUR_ACCESS_KEY",
+    secret_key="YOUR_SECRET_KEY",
+    bucket="my-bucket",
+    endpoint="https://s3.nevaobjects.id",  # default
+    default_expiry=3600,                   # URL expiry in seconds
+)
+```
+
+---
+
+## CLI Usage
+
+Set credentials once, then use any command.
+
+```bash
+nevaobst configure
+```
+
+Credentials can also be set via **environment variables** or **flags** on each command.
+
+| Source | Variables |
+|---|---|
+| Environment | `NEVA_ACCESS_KEY`, `NEVA_SECRET_KEY`, `NEVA_BUCKET`, `NEVA_ENDPOINT` |
+| Flags | `--access-key`, `--secret-key`, `--bucket`, `--endpoint` |
+| Config file | `~/.azzte/neva-obst.conf` (set via `nevaobst configure`) |
+
+Priority: **flags** → **env vars** → **config file**
+
+### Commands
+
+#### `upload`
+```bash
+nevaobst upload photo.jpg
+nevaobst upload "images/*" --prefix uploads/2024/
+nevaobst upload report.pdf --key docs/report-q1.pdf
+```
+
+#### `list`
+```bash
+nevaobst list
+nevaobst list -fs               # show size + last modified
+nevaobst list --prefix uploads/
+nevaobst list --json
+```
+
+Output is displayed as a file tree:
+```
+📄 text.txt
+📄 readme.md
+📁 reports/
+   📄 q1.pdf
+   📄 q2.pdf
+📁 uploads/
+   📁 2024/
+      📄 photo.jpg
+```
+
+#### `info`
+```bash
+nevaobst info photo.jpg
+nevaobst info photo.jpg --json
+```
+
+#### `get-url`
+```bash
+nevaobst get-url photo.jpg
+nevaobst get-url report.pdf --expires 3600
+```
+
+#### `delete`
+```bash
+nevaobst delete photo.jpg
+nevaobst delete a.jpg b.jpg c.jpg --force
+```
+
+### Global Flags
+
+Every command supports:
+
+| Flag | Description |
+|---|---|
+| `--json` | Output as JSON |
+| `--profile` | Use a named config profile (default: `default`) |
+| `--help` | Show help for the command |
+
+---
+
+## Changelog
+
+**2026-03-09**
+- Improved error handling (better 404 detection)
+- Added automatic **Content-Type detection** during upload
+- Added CLI (`nevaobst`)
+
+**2026-03-07**
+- Project renamed from **ate-dme-obst** → **ate-neva-obst**
+
+**2026-02-28**
+- Initial release of **ate-neva-obst** SDK
+
+---
+
+## Disclaimer
+
+- This package is **not officially affiliated with Neva Cloud or Domainesia**.
+- The SDK is **stateless** and does not transmit user data to third-party servers (except the target storage endpoint).
+- The official project website is currently under development and will include guides and full documentation.
+
+---
+
+## About
+
+**ate-neva-obst** is an open-source project built by [**AzzTE**](https://azzte.com).  
+Licensed under the **Apache 2.0 License**.
+
+Made with passion for developers who want a simple and clean Python SDK for Neva Object Storage.

@@ -1,0 +1,74 @@
+## NOTICE FILE
+
+Azzam Technology Ecosystem
+
+This project includes third-party software components.
+All respective copyrights and licenses are acknowledged below.
+
+ate-neva-obst:
+
+* Copyright (c) 2026 Azzam Technology Ecosystem
+* License: BSD 3-Clause
+
+---
+
+Amazon Web Services
+
+boto3:
+
+* Copyright (c) 2013-2017 Amazon.com, Inc. or its affiliates.
+* License: Apache License 2.0
+
+---
+
+Audrey Roy Greenfeld
+
+binaryornot:
+
+* Copyright (c) 2026 Audrey Roy Greenfeld
+* License: MIT License
+
+---
+
+Pallets
+
+click:
+
+* Copyright (c) 2014 Pallets
+* License: BSD 3-Clause
+
+---
+
+Holger Krekel and others
+
+pytest:
+
+* Copyright (c) 2004 Holger Krekel and others
+* License: MIT License
+
+---
+
+Steve Pulec
+
+moto:
+
+* Copyright (c) 2012 Steve Pulec
+* License: Apache License 2.0
+
+---
+
+Charles Marsh
+
+ruff:
+
+* Copyright (c) 2022 Charles Marsh
+* License: MIT License
+
+---
+
+Other Contributors
+
+pytest-cov:
+
+* Copyright (c) 2010 Meme Dough
+* License: MIT License
